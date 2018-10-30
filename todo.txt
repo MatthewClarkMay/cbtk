@@ -1,2 +1,3 @@
 - wildcard support (./cbtk_response.py -hn win7host -gd C:/Windows/Prefetch/*.pf)
 - artifact config file (similar to plaso filter_windows.txt)
+- CIDR range support
