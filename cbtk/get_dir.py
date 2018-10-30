@@ -11,7 +11,7 @@ def get_args():
     parser = argparse.ArgumentParser(description="Interact with Carbon Black Response API")
     parser.add_argument("-hn","--hostname", help="hostname", required=False)
     parser.add_argument("-hl","--hostlist", help="hostlist", required=False)
-    parser.add_argument("-gd","--get_directory", help="Pull down every file in directory (backslashes in filepath must be escaped, and directories must end in a backslash) [C:\\\Windows\\\]", required=False)
+    parser.add_argument("-gd","--get_directory", help="Pull down every file in directory [C:/Windows/Prefetch]", required=False)
     parser.add_argument("-dst","--dstpath", help="Destination directory path for storing retrieved files", required=False)
     parser.add_argument("-r","--recurse", help="Recursive flag for use with --list_direcrory and --get_directory", action="store_true", required=False)
     parser.add_argument("-lf","--logfile", help="Destination log file (defaults to cwd/get_dir.log)", required=False)
