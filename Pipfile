@@ -1,16 +1,12 @@
 [[source]]
-url = "https://pypi.org/simple"
 verify_ssl = true
+url = "https://pypi.org/simple"
 name = "pypi"
 
-[dev-packages]
-
 [packages]
-argparse = "*"
 cbapi = "*"
-configparser = "*"
-requests = "*"
-setuptools = "*"
+
+[dev-packages]
 
 [requires]
 python_version = "3.5"
