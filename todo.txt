@@ -1,3 +1,7 @@
-- wildcard support (./cbtk_response.py -hn win7host -gd C:/Windows/Prefetch/*.pf)
-- artifact config file (similar to plaso filter_windows.txt)
-- CIDR range support
+1. get_dir.py
+    - wildcard support (./cbtk_response.py -hn win7host -gd C:/Windows/Prefetch/*.pf)
+    - artifact config file (similar to plaso filter_windows.txt)
+    - --all flag for all hosts
+
+2. stack_files.py
+    - list directory stacking 
