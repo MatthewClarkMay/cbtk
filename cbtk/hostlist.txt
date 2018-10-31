@@ -3,3 +3,5 @@ ACMEOFFLINE
 acme1
 acme2
 acme3
+172.19.10.5
+172.25.10.0/24
