@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse,logging,os,pathlib,sys,time
+import argparse,ipaddress,logging,os,pathlib,re,sys,time
 #import glob,configparser,json
 from cbapi.live_response_api import LiveResponseError
 from cbapi.response import *
@@ -8,13 +8,13 @@ from pprint import pprint
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Interact with Carbon Black Response API")
-    parser.add_argument("-hn","--hostname", help="hostname", required=False)
-    parser.add_argument("-hl","--hostlist", help="hostlist", required=False)
+    parser = argparse.ArgumentParser(description="Download entire directories from sensors using Carbon Black Response API")
+    parser.add_argument("-hn","--hostname", help="Sensor hostname", required=False)
+    parser.add_argument("-hl","--hostlist", help="Hostlist of sensors separated by newlines. Can contain hostnames, IPs or CIDR ranges.", required=False)
     parser.add_argument("-gd","--get_directory", help="Pull down every file in directory [C:/Windows/Prefetch]", required=False)
     parser.add_argument("-dst","--dstpath", help="Destination directory path for storing retrieved files", required=False)
-    parser.add_argument("-r","--recurse", help="Recursive flag for use with --list_direcrory and --get_directory", action="store_true", required=False)
-    parser.add_argument("-lf","--logfile", help="Destination log file (defaults to cwd/get_dir.log)", required=False)
+    parser.add_argument("-r","--recurse", help="Recursive flag for use with --get_directory", action="store_true", required=False)
+    parser.add_argument("-lf","--logfile", help="Destination log file (defaults to cwd/get_dir.log) (does not truncate automatically with each program execution)", required=False)
     return vars(parser.parse_args())
 
 
@@ -24,6 +24,19 @@ def print_banner(banner):
     print("----------")
     print(banner)
     print("----------")
+
+
+# accepts string
+# determines whether that string is an ip, cidr range, or hostname - returns verdict as a string
+def translate_host(host):
+    ip = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"
+    cidr = "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/(3[0-2]|[1-2][0-9]|[0-9]))$"
+    if re.match(ip, host):
+        return "ip"
+    if re.match(cidr, host):
+        return "cidr"
+    else:
+        return "hostname"
 
 
 # accepts raw path, and os_type
@@ -161,17 +174,32 @@ def main():
         job_dict = {}
         p = pathlib.Path.cwd().joinpath(args["hostlist"])
         with open(str(p), mode="r") as f:
-            hostlist = (line.rstrip() for line in f)
-            hostlist = list(set(line for line in hostlist if line))
-            for host in hostlist:
-                sensor = cb.select(Sensor).where("hostname:{}".format(host.strip("\n\r"))).first()
+            rawlist = (line.rstrip() for line in f)
+            hostdict = {}
+
+            for host in rawlist:
+                if translate_host(host) == "ip":
+                    hostdict[host] = "ip"
+                elif translate_host(host) == "cidr":
+                    net = ipaddress.ip_network(host)
+                    for n in net:
+                        hostdict[str(n)] = "ip"
+                else:
+                    hostdict[host] = "hostname"
+
+            for host in hostdict:
+                if hostdict[host] == "hostname":
+                    sensor = cb.select(Sensor).where("hostname:{}".format(host.strip("\n\r"))).first()
+                if hostdict[host] == "ip":
+                    sensor = cb.select(Sensor).where("ip:{}".format(host.strip("\n\r"))).first()
+
                 if not sensor:
-                    print("Sensor query did not return any results - {}".format(host))
-                    logging.error("Sensor query did not return any results - hostname:{}".format(host))
+                    print("Sensor query did not return any results - {}:{}".format(hostdict[host], host))
+                    logging.error("Sensor query did not return any results - {}:{}".format(hostdict[host], host))
                     continue
                 if sensor.status.lower() != "online":
-                    print("Sensor is offline - {}".format(host))
-                    logging.error("Sensor is offline - {} derived from hostname:{}".format(sensor.computer_name, host))
+                    print("Sensor is offline - {} derived from {}:{}".format(sensor.computer_name, hostdict[host], host))
+                    logging.error("Sensor is offline - {} derived from {}:{}".format(sensor.computer_name, hostdict[host], host))
                     continue
                 else:
                     os_type=sensor.os_environment_display_string.split(" ")[0] # returns mac, linux, or windows
