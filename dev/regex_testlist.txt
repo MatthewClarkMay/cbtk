@@ -1,0 +1,17 @@
+host
+host.acme.com
+192.168.4.0/24
+192.168.4.0/0
+192.168.4.0/1
+172.25.0.3
+172.25.0.0.0
+172.25..0
+172.25.0.
+172..
+host-acme.com
+host_acme_test.com
+host_acme
+host_acme-test
+host-acme
+host_acme-test.com
+
