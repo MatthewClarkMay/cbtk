@@ -39,7 +39,6 @@ class CreateProc:
         print(session.create_process(r'netstat -at'))
 
 
-
 def main():
     args = get_args()
     cb = CbResponseAPI()
