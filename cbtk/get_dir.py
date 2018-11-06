@@ -50,7 +50,7 @@ def translate_path(path,os_type="windows",new_dir=None):
     elif os_type.lower() == "windows":
         try:
             if new_dir:
-                pure_path = "{}\\{}\\".format(pathlib.PureWindowsPath(path))
+                pure_path = "{}\\{}\\".format(pathlib.PureWindowsPath(path),new_dir)
             else:
                 pure_path = "{}\\".format(pathlib.PureWindowsPath(path))
         except NotImplementedError as e:
