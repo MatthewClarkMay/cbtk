@@ -7,7 +7,7 @@ chardet==3.0.4
 idna==2.8
 pika==1.1.0
 prompt-toolkit==2.0.10
-protobuf==3.10.0
+protobuf==3.18.3
 pygments==2.4.2
 python-dateutil==2.8.0
 pyyaml==5.1.2
